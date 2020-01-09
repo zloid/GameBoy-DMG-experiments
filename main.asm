@@ -17,7 +17,12 @@
 SECTION "Program Start",ROM0[$150]
 START:
 	ei				 ;enable interrupts
-	ld  sp,$FFFE
+	;==============================================
+	;	There is an additional thing that needs to be explained for this to be complete, though, and it's the IME bit. IME is simply a bit that, when zero, causes the CPU to skip checking for interrupts (the process described in the paragraph above). It being called the Interrupt Master Enable thus makes sense. IME is not exposed through any registers in the I/O area. Instead, it can be reset by the di (Disable Interrupts) and set by theei (Enable Interrupts) instructions.
+	;===============================================	
+	; $FFFF
+	; ld  sp,$FFFE
+
 	ld  a,IEF_VBLANK ;enable vblank interrupt
 	ld  [rIE],a
 
