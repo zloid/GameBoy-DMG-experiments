@@ -1,6 +1,6 @@
-;-------------
-;	Header
-;-------------
+;================================================================
+;Header
+;================================================================
 
 SECTION "Copy Data",ROM0[$28] ;copy DMA routine to HRAM
 COPY_DATA:
@@ -52,8 +52,8 @@ SECTION "Start",ROM0[$100]
 	DB  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99
 	DB  $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E
 
-	; $0134-$013E Game title
-	DB	"PlantBoy   "
+	; $0134-$013E Game title - 11 char
+	DB	"idolzBoy   "
 		;0123456789A
 
 	; $013F-$0142 Product code, leave blank
