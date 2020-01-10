@@ -1,6 +1,7 @@
 INCLUDE "hardware.inc"
 INCLUDE "header.asm"
 INCLUDE "tiles.asm"
+INCLUDE "map.asm"
 
 SECTION "Game Start",ROM0[$150];put code in bank0 HOME memory on [$150] adress
 START:
@@ -11,11 +12,10 @@ START:
 	ld  [rIE],a		;put A to [rIE], meaning value at i/o IE memory adress [$FFFF] become %00000001 (according to hardware.inc), now V-Blank interrupts can be catch 60 time in second
 
 ; ; todo
-; .waitVBlank		 	;loop
-; 	ld a, [rLY]		
-; 	cp 144 			 ;Check if the LCD is past VBlank, meaning ComPare A and 144 number
-; 	jr c, .waitVBlank;if previous Comparison is TRUE then execute code next (below), else go to right local label .waitVBlank, meaning do looping
-
+.waitVBlank		 	;loop
+	ld a, [rLY]		
+	cp 144 			 ;Check if the LCD is past VBlank, meaning ComPare A and 144 number
+	jr c, .waitVBlank;if previous Comparison is TRUE then execute code next (below), else go to right local label .waitVBlank, meaning do looping
 	ld  a,0			;for off LCD we need to reset bit 7, (xor A)
 	ldh [rLCDC],a 	;LCD off
 	ldh [rSTAT],a
@@ -25,9 +25,9 @@ START:
 	ldh [rOCPD],a
 	ldh [rOBP0],a
 
-	call CLEAR_MAP
-	call LOAD_TILES
-	; call LOAD_MAP
+	call CLEAR_MAP;	clear nintendo logo
+	call LOAD_TILES;load tiles
+	; call LOAD_MAP	;load tiles map, meaning how tiles located on screen
 	; call INIT_PLAYER
 	; call INIT_RABBITS
 	; call INIT_TIMERS
@@ -76,6 +76,20 @@ LOAD_TILES:
 	ld  a,b
 	or  c
 	jr  nz,.load_tiles_loop
+	ret
+
+LOAD_MAP:
+	ld  hl,MAP_DATA  ;same as LOAD_TILES
+	ld  de,_SCRN0
+	ld  bc,$400
+.load_map_loop
+	ld  a,[hli]
+	ld  [de],a
+	inc de
+	dec bc
+	ld  a,b
+	or  c
+	jr  nz,.load_map_loop
 	ret
 
 ;-------------
