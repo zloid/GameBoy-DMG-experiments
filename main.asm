@@ -1,15 +1,15 @@
 INCLUDE "hardware.inc"
 INCLUDE "header.asm"
 
-SECTION "Program Start",ROMO[$150]
+SECTION "Game Start",ROMO[$150];put code in bank0 HOME memory on [$150] adress
 START:
-	ei				 ;enable interrupts
-	ld  sp,$FFFE	 ; sp is the CPU's implementation of the stack concept. It's a 16-bit register that points to the top of the stack.
-	ld  a,IEF_VBLANK ;enable vblank interrupt
-	ld  [rIE],a
+	ei				;enable interrupts, for read input buttons in future
+	ld  sp,$FFFE	;sp is the CPU's implementation of the stack concept. It's a 16-bit register that points to the top of the stack.
+	ld  a,IEF_VBLANK;enable vblank interrupt, meaning put %00000001 to A register
+	ld  [rIE],a		;put A to [rIE], meaning value at i/o IE memory adress $FFFF become %00000001, according to hardware.inc, now V-Blank interrupt can be catch
 
-	ld  a,$0
-	ldh [rLCDC],a 	 ;LCD off
+	ld  a,0			;need to reset bit 7, xor a is an analog
+	ldh [rLCDC],a 	;LCD off
 	ldh [rSTAT],a
 
 	ld  a,%11100100  ;shade palette (11 10 01 00)
