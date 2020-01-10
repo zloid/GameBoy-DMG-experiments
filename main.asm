@@ -1,5 +1,6 @@
 INCLUDE "hardware.inc"
 INCLUDE "header.asm"
+INCLUDE "tiles.asm"
 
 SECTION "Game Start",ROM0[$150];put code in bank0 HOME memory on [$150] adress
 START:
@@ -25,7 +26,7 @@ START:
 	ldh [rOBP0],a
 
 	call CLEAR_MAP
-	; call LOAD_TILES
+	call LOAD_TILES
 	; call LOAD_MAP
 	; call INIT_PLAYER
 	; call INIT_RABBITS
@@ -51,13 +52,6 @@ LOOP:
 
 
 
-
-
-
-
-
-
-
 CLEAR_MAP:			;clear NINTENDO start logo
 	ld  hl,_SCRN0    ;load map0 ram
 	ld  bc,$400
@@ -69,6 +63,21 @@ CLEAR_MAP:			;clear NINTENDO start logo
 	or  c
 	jr  nz,.clear_map_loop
 	ret
+
+LOAD_TILES:
+	ld  hl,TILE_DATA
+	ld  de,_VRAM
+	ld  bc,TILE_COUNT; in tiles.asm
+.load_tiles_loop
+	ld  a,[hli]      ;grab a byte
+	ld  [de],a       ;store the byte in VRAM
+	inc de
+	dec bc
+	ld  a,b
+	or  c
+	jr  nz,.load_tiles_loop
+	ret
+
 ;-------------
 ; RAM Vars
 ;-------------
