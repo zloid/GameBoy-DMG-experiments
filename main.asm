@@ -1,62 +1,80 @@
 INCLUDE "hardware.inc"
-INCLUDE "header.asm"
-INCLUDE "tiles.asm"
-INCLUDE "map.asm"
+  INCLUDE "header.asm"
+; INCLUDE "tiles_map_mario.inc"
+	INCLUDE "tiles.asm"
+     INCLUDE "map.asm"
 
-SECTION "Game Start",ROM0[$150];put code in bank0 HOME memory on [$150] adress
+SECTION "Program Start",ROM0[$150]
 START:
- 
-	ei				;enable interrupts, for read input buttons in future
-	ld  sp,$FFFE	;sp is the CPU's implementation of the stack concept. It's a 16-bit register that points to the top of the stack.
-	ld  a,IEF_VBLANK;enable vblank interrupt, meaning put %00000001 to A register
-	ld  [rIE],a		;put A to [rIE], meaning value at i/o IE memory adress [$FFFF] become %00000001 (according to hardware.inc), now V-Blank interrupts can be catch 60 time in second
+	; ei				 ;enable interrupts
+	; ld  sp,$FFFE
+	; ld  a,IEF_VBLANK ;enable vblank interrupt
+	; ld  [rIE],a	
+.waitVBlank
+    ld a, [rLY]
+    cp 144 ; Check if the LCD is past VBlank
+    jr c, .waitVBlank
 
-; ; todo
-.waitVBlank		 	;loop
-	ld a, [rLY]		
-	cp 144 			 ;Check if the LCD is past VBlank, meaning ComPare A and 144 number
-	jr c, .waitVBlank;if previous Comparison is TRUE then execute code next (below), else go to right local label .waitVBlank, meaning do looping
-	ld  a,0			;for off LCD we need to reset bit 7, (xor A)
-	ldh [rLCDC],a 	;LCD off
+	ld  a,$0
+	ldh [rLCDC],a 	 ;LCD off
 	ldh [rSTAT],a
 
 	ld  a,%11100100  ;shade palette (11 10 01 00)
 	ldh [rBGP],a 	 ;setup palettes
 	ldh [rOCPD],a
 	ldh [rOBP0],a
+; =======================rLCDC off========================================
+	call CLEAR_MAP
+	; call LOAD_TILES
+	; call LOAD_MAP
+; =======================rLCDC on=========================================
 
-	call CLEAR_MAP;	clear nintendo logo
-	call LOAD_TILES;load tiles
-	; call LOAD_MAP	;load tiles map, meaning how tiles located on screen
-	; call INIT_PLAYER
-	; call INIT_RABBITS
-	; call INIT_TIMERS
+
+	; ld a, %11100100
+    ; ld [rBGP], a
+
 
 	ld  a,%11010011  ;turn on LCD, BG0, OBJ0, etc
+	; ld  a,%1000001  ;turn on LCD, BG0, OBJ0, etc
 	ldh [rLCDC],a    ;load LCD flags
 
-	; call DMA_COPY    ;move DMA routine to HRAM
+	call DMA_COPY    ;move DMA routine to HRAM
 LOOP:
-	; call WAIT_VBLANK
+	call WAIT_VBLANK
 	; call READ_JOYPAD
-	; call MOVE_PLAYER
-	; call PLAYER_SHOOT
-	; call UPDATE_BULLET
-	; call SPAWN_RABBITS
-	; call ANIMATE_RABBITS
-	; call UPDATE_RABBITS
-	; call UPDATE_PLAYER
-	; call PLAYER_WATER
 	; call _HRAM		 ;call DMA routine from HRAM
 	jp LOOP
 
+;-------------
+; Subroutines
+;-------------
 
-
-CLEAR_MAP:			;clear NINTENDO start logo
-	ld  hl,_SCRN0    ;load map0 ram
-	ld  bc,$400
-.clear_map_loop
+WAIT_VBLANK:
+	ld  hl,VBLANK_FLAG; ?copy 16 bit to HL register?
+.wait_vblank_loop
+	halt
+	nop  			 ;Hardware bug
 	ld  a,$0
+	cp  [hl]
+	jr  z,.wait_vblank_loop
+	ld  [hl],a
+	ld  a,[vblank_count]
+	inc a
+	ld  [vblank_count],a
+	ret
+
+DMA_COPY:
+	ld  de,$FF80  	 ;DMA routine, gets placed in HRAM
+	rst $28
+	DB  $00,$0D
+	DB  $F5, $3E, $C1, $EA, $46, $FF, $3E, $28, $3D, $20, $FD, $F1, $D9
+	ret
+
+CLEAR_MAP:
+	ld  hl,_SCRN0    ;load map0 ram (locate in VRAM), _SCRN0 EQU $9800 ; $9800->$9BFF ; tilemap one at $9800-$9BFF ; HL == $9800
+	ld  bc,$400	 	 ;BC == $400			
+.clear_map_loop
+	ld  a,$0	 	 ;A == 0
 	ld  [hli],a      ;clear tile, increment hl
 	dec bc
 	ld  a,b
@@ -67,7 +85,7 @@ CLEAR_MAP:			;clear NINTENDO start logo
 LOAD_TILES:
 	ld  hl,TILE_DATA
 	ld  de,_VRAM
-	ld  bc,TILE_COUNT; in tiles.asm
+	ld  bc,TILE_COUNT
 .load_tiles_loop
 	ld  a,[hli]      ;grab a byte
 	ld  [de],a       ;store the byte in VRAM
@@ -92,10 +110,96 @@ LOAD_MAP:
 	jr  nz,.load_map_loop
 	ret
 
-;-------------
-; RAM Vars
-;-------------
+READ_JOYPAD:
+	ld  a,%00100000  ;select dpad
+	ld  [rP1],a
+	ld  a,[rP1]		 ;takes a few cycles to get accurate reading
+	ld  a,[rP1]
+	ld  a,[rP1]
+	ld  a,[rP1]
+	cpl 			 ;complement a
+	and %00001111    ;select dpad buttons
+	swap a
+	ld  b,a
+
+	ld  a,%00010000  ;select other buttons
+	ld  [rP1],a  
+	ld  a,[rP1]
+	ld  a,[rP1]
+	ld  a,[rP1]
+	ld  a,[rP1]
+	cpl
+	and %00001111
+	or  b
+					 ;lower nybble is other
+	ld  b,a
+	ld  a,[joypad_down]
+	cpl
+	and b
+	ld  [joypad_pressed],a
+					 ;upper nybble is dpad
+	ld  a,b
+	ld  [joypad_down],a
+	ret
+
+JOY_RIGHT:
+	and %00010000
+	cp  %00010000
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_LEFT:
+	and %00100000
+	cp  %00100000
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_UP:
+	and %01000000
+	cp  %01000000
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_DOWN:
+	and %10000000
+	cp  %10000000
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_A:
+	and %00000001
+	cp  %00000001
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_B:
+	and %00000010
+	cp  %00000010
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_SELECT:
+	and %00000100
+	cp  %00000100
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_START:
+	and %00001000
+	cp  %00001000
+	jp  nz,JOY_FALSE
+	ld  a,$1
+	ret
+JOY_FALSE:
+	ld  a,$0
+	ret
 
 SECTION "RAM Vars",WRAM0[$C000]
-vblank_flag:
-db
+VBLANK_FLAG:
+; db 
+vblank_count:
+; db
+joypad_down:
+; db                   ;dow/up/lef/rig/sta/sel/a/b
+joypad_pressed:
+; db

@@ -30,7 +30,7 @@ COPY_DATA:
 ; todo
 SECTION "VBlank IRQ",ROM0[$40]
 	ld  a,$1
-	ld  [vblank_flag],a
+	ld  [VBLANK_FLAG],a
 	reti
 
 SECTION	"LCD IRQ Vector",ROM0[$48]
