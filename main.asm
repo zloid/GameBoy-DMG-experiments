@@ -6,7 +6,27 @@ INCLUDE "hardware.inc"
 
 SECTION "Program Start",ROM0[$150]
 START:
-	di
+	call LCD_OFF
+; =======================rLCDC off========================================
+	call CLEAR_MAP
+	call LOAD_TILES
+	call LOAD_MAP
+; =======================rLCDC on=========================================
+	call LCD_ON
+
+	call DMA_COPY    ;move DMA routine to HRAM
+
+LOOP:
+	call WAIT_VBLANK
+	; call READ_JOYPAD
+	call _HRAM		 ;call DMA routine from HRAM
+	jp LOOP
+
+;-------------
+; Subroutines
+;-------------
+LCD_OFF:
+di
 	; ei				 ;enable interrupts
 	; ld  sp,$FFFE
 	; ld  a,IEF_VBLANK ;enable vblank interrupt
@@ -24,31 +44,15 @@ START:
 	ldh [rBGP],a 	 ;setup palettes
 	ldh [rOCPD],a
 	ldh [rOBP0],a
-; =======================rLCDC off========================================
-	call CLEAR_MAP
-	call LOAD_TILES
-	call LOAD_MAP
-; =======================rLCDC on=========================================
+	ret
 
-
+LCD_ON:
 	; ld a, %11100100
     ; ld [rBGP], a
-
-
 	ld  a,%11010011  ;turn on LCD, BG0, OBJ0, etc
 	; ld  a,%1000001  ;turn on LCD, BG0, OBJ0, etc
 	ldh [rLCDC],a    ;load LCD flags
-
-	call DMA_COPY    ;move DMA routine to HRAM
-LOOP:
-	call WAIT_VBLANK
-	; call READ_JOYPAD
-	; call _HRAM		 ;call DMA routine from HRAM
-	jp LOOP
-
-;-------------
-; Subroutines
-;-------------
+	ret
 
 WAIT_VBLANK:
 	ld  hl,VBLANK_FLAG; ?copy 16 bit to HL register?
@@ -209,3 +213,4 @@ joypad_down:
 db                   ;dow/up/lef/rig/sta/sel/a/b
 joypad_pressed:
 db
+

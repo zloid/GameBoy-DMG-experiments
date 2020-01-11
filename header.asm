@@ -28,11 +28,20 @@ COPY_DATA:
  
 ; =============================================
 ; todo
-SECTION "VBlank IRQ",ROM0[$40]
-	ld  a,$1
-	ld  [VBLANK_FLAG],a
-	reti
+; SECTION "VBlank IRQ",ROM0[$40]
+; 	ld  a,$1
+; 	ld  [VBLANK_FLAG],a
+; 	reti
 
+; ===================================================
+SECTION	"VBlank interrupt",ROM0[$40]
+IRQ_VBlank:
+	ld  a,$1
+	; call  [VBLANK_FLAG],a
+	ld  [VBLANK_FLAG],a
+	; call	DoVBlank
+	reti
+; ===================================================
 SECTION	"LCD IRQ Vector",ROM0[$48]
 LCD_VECT:
 	reti
@@ -104,3 +113,35 @@ SECTION "Header",ROM0[$100]
 
 	; $014E-$014F (Cartridge checksum - handled by RGBFIX)
 	DW	$00
+
+
+
+; ================================================================
+; Do VBlank stuff
+; ================================================================
+
+; DoVBlank:
+; 	push	af	
+; 	ld	a,2
+; 	ld	[rROMB0],a
+; 	call	$4006		; update SFX
+; 	ld	a,[PlayMusic]
+; 	and	a
+; 	jr	z,.incFrame
+; 	ld	a,[MusicBank]
+; 	ld	[rROMB0],a
+; 	call	$4100		; update music
+; .incFrame:
+; 	ld	a,[CurrentFrame]
+; 	inc	a
+; 	ld	[CurrentFrame],a
+; .updateParTile
+; 	ld	a,[GameMode]
+; 	cp	GM_TestScreen
+; 	jr	nz,.dontUpdate
+; 	call	ParTile_CopyToVRAM
+; .dontUpdate
+; 	pop	af
+; 	ret
+	
+; ================================================================
