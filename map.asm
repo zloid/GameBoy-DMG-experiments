@@ -4,11 +4,16 @@
 
 ; MAP_SIZE  EQU 20*18
 ; MAP_SIZE  EQU 16*10
-MAP_SIZE  EQU 32*32
+; MAP_SIZE  EQU 32*32
+; MAP_SIZE  EQU $A0
+MAP_SIZE  EQU $A0
+; hello_world_tile_map_size EQU $A0
 
 SECTION "Map",ROM0
 
 MAP_DATA:
+; DB 29
+; DB $00
 DB $00,$01,$02,$03,$04,$05,$06,$07,$00,$08,$09,$0A,$0B,$0C,$0D,$0E
 DB $0F,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1A,$1B,$1C,$1D,$1E
 DB $1F,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$2A,$2B,$2C,$2D,$2E
