@@ -1,20 +1,20 @@
 INCLUDE "hardware.inc"
   INCLUDE "header.asm"
-; INCLUDE "tiles_map_mario.inc"
 	INCLUDE "tiles.asm"
      INCLUDE "map.asm"
 
 SECTION "Program Start",ROM0[$150]
 START:
-	call LCD_OFF
 ; =======================rLCDC off========================================
-	call CLEAR_MAP
+	call LCD_OFF
+	call CLEAR_TILE_MAP
 	call LOAD_TILES
-	call LOAD_MAP
-; =======================rLCDC on=========================================
-	call LCD_ON
+	call LOAD_TILE_MAP
 
-	call DMA_COPY    ;move DMA routine to HRAM
+	call CLEAR_OAM		;test fun
+; ======================rLCDC on=========================================
+	call LCD_ON
+	call DMA_COPY    	;move DMA routine to HRAM
 
 LOOP:
 	call WAIT_VBLANK
@@ -75,7 +75,7 @@ DMA_COPY:
 	DB  $F5, $3E, $C1, $EA, $46, $FF, $3E, $28, $3D, $20, $FD, $F1, $D9
 	ret
 
-CLEAR_MAP:			;tilemap function
+CLEAR_TILE_MAP:			;tilemap function
 	; ld  hl,$8000	;test only
 	ld  hl,_SCRN0   ;load map0 ram (locate in VRAM), _SCRN0 EQU $9800 ; $9800->$9BFF ; tilemap one at $9800-$9BFF ; HL == $9800
 	ld  bc,$400	 	;??? BC == $400. Maybe B == $40  C == $0
@@ -91,6 +91,17 @@ CLEAR_MAP:			;tilemap function
 ; CLEAR_MAP_2:
 ; 	ld hl,_SCRN0	
 ; 	ld bc,$3ff		;numbers of byte in _SCRN0 tile-map0, we can put $400
+CLEAR_OAM:
+	ld  hl,_OAMRAM  
+	ld  bc,160		;$a0 == 160 byte in OAM
+.clear_oam_loop
+	ld  a,0	 	
+	ld  [hli],a		
+	dec bc			
+	ld  a,b			
+	or  c			
+	jr  nz,.clear_oam_loop
+	ret			
 ;============================================================
 LOAD_TILES:
 	ld  hl,TILE_DATA
@@ -106,7 +117,7 @@ LOAD_TILES:
 	jr  nz,.load_tiles_loop
 	ret
 
-LOAD_MAP:
+LOAD_TILE_MAP:
 	ld  hl,MAP_DATA  ;same as LOAD_TILES
 	ld  de,_SCRN0
 	ld  bc,$400
