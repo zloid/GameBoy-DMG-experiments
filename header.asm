@@ -38,7 +38,7 @@ SECTION	"VBlank interrupt",ROM0[$40]
 IRQ_VBlank:
 	ld  a,$1
 	; call  [VBLANK_FLAG],a
-	ld  [VBLANK_FLAG],a
+	ld  [vblank_flag],a
 	; call	DoVBlank
 	reti
 ; ===================================================
