@@ -1,17 +1,12 @@
-INCLUDE "hardware.inc"
-  INCLUDE "header.asm"
-	INCLUDE "tiles.asm"
-     INCLUDE "map.asm"
-
 SECTION "Program Start",ROM0[$150]
 START:
 ; =======================rLCDC off========================================
 	call LCD_OFF
-	
+
 	ei				 ;enable interrupts
 	ld  sp,$FFFE
 	ld  a,IEF_VBLANK ;enable vblank interrupt
-	ld  [rIE],a	
+	ld  [rIE],a
 
 	call CLEAR_TILE_MAP
 	call LOAD_TILES
@@ -20,18 +15,18 @@ START:
 ;========================================================================
 	call CLEAR_RAM
 	call INIT_PLAYER
-	; call INIT_TIMERS		
-; ======================rLCDC on=========================================	 
+	; call INIT_TIMERS
+; ======================rLCDC on=========================================
 	call LCD_ON
 	call DMA_COPY    	;move DMA routine to HRAM
 
 LOOP:
-	call WAIT_VBLANK	
+	call WAIT_VBLANK
 	call READ_JOYPAD
 	call MOVE_PLAYER
 	call _HRAM		 ;call DMA routine from HRAM
 	jp LOOP
- 
+
 ;-------------
 ; Subroutines
 ;-------------
@@ -75,7 +70,7 @@ WAIT_VBLANK:
 	ret
 
 DMA_COPY:
-	ld  de,$FF80  	 ;DMA routine, gets placed in HRAM 
+	ld  de,$FF80  	 ;DMA routine, gets placed in HRAM
 	rst $28
 	DB  $00,$0D
 	DB  $F5, $3E, $C1, $EA, $46, $FF, $3E, $28, $3D, $20, $FD, $F1, $D9
@@ -87,24 +82,24 @@ CLEAR_TILE_MAP:			;tilemap function
 	ld  bc,$400	 	;??? BC == $400. Maybe B == $40  C == $0
 .clear_map_loop
 	ld  a,$0	 	;A == 0
-	ld  [hli],a		;clear tile (actually clear 1 HEX adress of tilemap first ), meaning put 0 to HL-memory adress _SCRN0, then do increment HL by one, 
+	ld  [hli],a		;clear tile (actually clear 1 HEX adress of tilemap first ), meaning put 0 to HL-memory adress _SCRN0, then do increment HL by one,
 	dec bc			;??? incrementing and decrementing is addition and subtraction by one. Meaning $400 - $1 = $3ff
-	ld  a,b			;load B to A. Mean  	
+	ld  a,b			;load B to A. Mean
 	or  c			;
 	jr  nz,.clear_map_loop
-	ret			
+	ret
 ;============================================================
 
 ; CLEAR_OAM:
-; 	ld  hl,_OAMRAM  
+; 	ld  hl,_OAMRAM
 ; 	ld  b,160		;$a0 == 160 byte in OAM
 ; .clear_oam_loop
-; 	ld  a,0	 	
-; 	ld  [hli],a		
-; 	dec b			
-; 	ld  a,b			
+; 	ld  a,0
+; 	ld  [hli],a
+; 	dec b
+; 	ld  a,b
 ; 	jr  nz,.clear_oam_loop
-; 	ret			
+; 	ret
 
 CLEAR_OAM:
   ld  hl,_OAMRAM
@@ -180,7 +175,7 @@ READ_JOYPAD:
 	ld  b,a
 
 	ld  a,%00010000  ;select other buttons
-	ld  [rP1],a  
+	ld  [rP1],a
 	ld  a,[rP1]
 	ld  a,[rP1]
 	ld  a,[rP1]
@@ -250,7 +245,7 @@ JOY_START:
 JOY_FALSE:
 	ld  a,$0
 	ret
-	
+
 
 INIT_PLAYER:
 	ld  a,$50
@@ -301,7 +296,7 @@ MOVE_PLAYER:
 	jr  z,.tile_reset
 
 	ld  b,a
-	ld  a,[joypad_down]       ;dpad pressed? 
+	ld  a,[joypad_down]       ;dpad pressed?
 	and %11110000
 	jr  z,.tile_reset
 
@@ -378,7 +373,7 @@ MOVE_PLAYER:
 ;-------------
 ; $D2 == 210
 SECTION "RAM Vars",WRAM0[$C000]
-vblank_flag: 
+vblank_flag:
 db
 rabbit_spawn_time:
 db
@@ -416,7 +411,6 @@ db
 ; db
 ; crop_count_x:
 ; db
-  								 
+
 ;-------------
 ; End of file
-;-------------
