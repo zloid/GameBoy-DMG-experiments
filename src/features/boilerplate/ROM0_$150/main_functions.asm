@@ -80,125 +80,97 @@ CLEAR_RAM:
   or  c
   jr  nz,.clear_ram_loop
   ret
-;============================================================
-; LOAD_TILES:
-; 	ld  hl,TILE_DATA
-; 	ld  de,_VRAM
-; 	ld  bc,TILE_COUNT
-; .load_tiles_loop
-; 	ld  a,[hli]      ;grab a byte
-; 	ld  [de],a       ;store the byte in VRAM
-; 	inc de
-; 	dec bc
-; 	ld  a,b
-; 	or  c
-; 	jr  nz,.load_tiles_loop
-; 	ret
-
-; LOAD_TILE_MAP:
-; 	ld  hl,MAP_DATA  ;same as LOAD_TILES
-; 	ld  de,_SCRN0
-; 	ld  bc,$400
-; .load_map_loop
-; 	ld  a,[hli]
-; 	ld  [de],a
-; 	inc de
-; 	dec bc
-; 	ld  a,b
-; 	or  c
-; 	jr  nz,.load_map_loop
-; 	ret
-
+  
 ;=================================================================================
-INIT_TIMERS:
-	ld a,$0
-	ld [player_frame_time],a
+; INIT_TIMERS:
+; 	ld a,$0
+; 	ld [player_frame_time],a
 
-	ret
+; 	ret
 
-READ_JOYPAD:
-	ld  a,%00100000  ;select dpad
-	ld  [rP1],a
-	ld  a,[rP1]		 ;takes a few cycles to get accurate reading
-	ld  a,[rP1]
-	ld  a,[rP1]
-	ld  a,[rP1]
-	cpl 			 ;complement a
-	and %00001111    ;select dpad buttons
-	swap a
-	ld  b,a
+; READ_JOYPAD:
+; 	ld  a,%00100000  ;select dpad
+; 	ld  [rP1],a
+; 	ld  a,[rP1]		 ;takes a few cycles to get accurate reading
+; 	ld  a,[rP1]
+; 	ld  a,[rP1]
+; 	ld  a,[rP1]
+; 	cpl 			 ;complement a
+; 	and %00001111    ;select dpad buttons
+; 	swap a
+; 	ld  b,a
 
-	ld  a,%00010000  ;select other buttons
-	ld  [rP1],a
-	ld  a,[rP1]
-	ld  a,[rP1]
-	ld  a,[rP1]
-	ld  a,[rP1]
-	cpl
-	and %00001111
-	or  b
-					 ;lower nybble is other
-	ld  b,a
-	ld  a,[joypad_down]
-	cpl
-	and b
-	ld  [joypad_pressed],a
-					 ;upper nybble is dpad
-	ld  a,b
-	ld  [joypad_down],a
-	ret
+; 	ld  a,%00010000  ;select other buttons
+; 	ld  [rP1],a
+; 	ld  a,[rP1]
+; 	ld  a,[rP1]
+; 	ld  a,[rP1]
+; 	ld  a,[rP1]
+; 	cpl
+; 	and %00001111
+; 	or  b
+; 					 ;lower nybble is other
+; 	ld  b,a
+; 	ld  a,[joypad_down]
+; 	cpl
+; 	and b
+; 	ld  [joypad_pressed],a
+; 					 ;upper nybble is dpad
+; 	ld  a,b
+; 	ld  [joypad_down],a
+; 	ret
 
-JOY_RIGHT:
-	and %00010000
-	cp  %00010000
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_LEFT:
-	and %00100000
-	cp  %00100000
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_UP:
-	and %01000000
-	cp  %01000000
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_DOWN:
-	and %10000000
-	cp  %10000000
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_A:
-	and %00000001
-	cp  %00000001
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_B:
-	and %00000010
-	cp  %00000010
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_SELECT:
-	and %00000100
-	cp  %00000100
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_START:
-	and %00001000
-	cp  %00001000
-	jp  nz,JOY_FALSE
-	ld  a,$1
-	ret
-JOY_FALSE:
-	ld  a,$0
-	ret
+; JOY_RIGHT:
+; 	and %00010000
+; 	cp  %00010000
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_LEFT:
+; 	and %00100000
+; 	cp  %00100000
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_UP:
+; 	and %01000000
+; 	cp  %01000000
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_DOWN:
+; 	and %10000000
+; 	cp  %10000000
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_A:
+; 	and %00000001
+; 	cp  %00000001
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_B:
+; 	and %00000010
+; 	cp  %00000010
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_SELECT:
+; 	and %00000100
+; 	cp  %00000100
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_START:
+; 	and %00001000
+; 	cp  %00001000
+; 	jp  nz,JOY_FALSE
+; 	ld  a,$1
+; 	ret
+; JOY_FALSE:
+; 	ld  a,$0
+; 	ret
 
 
 ; INIT_PLAYER:
@@ -215,86 +187,86 @@ JOY_FALSE:
 
 ; 	ret
 
-MOVE_PLAYER:
-	ld  a,[player_frame_time] ;animate player tile
-	cp  $8
-	jr  nz,.move_speed
-	ld  a,$0
-	ld  [player_frame_time],a
-	ld  a,[player_tile]
-	inc a
-	cp  $6
-	jr  z,.tile_reset
+; MOVE_PLAYER:
+; 	ld  a,[player_frame_time] ;animate player tile
+; 	cp  $8
+; 	jr  nz,.move_speed
+; 	ld  a,$0
+; 	ld  [player_frame_time],a
+; 	ld  a,[player_tile]
+; 	inc a
+; 	cp  $6
+; 	jr  z,.tile_reset
 
-	ld  b,a
-	ld  a,[joypad_down]       ;dpad pressed?
-	and %11110000
-	jr  z,.tile_reset
+; 	ld  b,a
+; 	ld  a,[joypad_down]       ;dpad pressed?
+; 	and %11110000
+; 	jr  z,.tile_reset
 
-	ld  a,b
-	ld  [player_tile],a
-.move_speed
-	ld  a,[vblank_count]
-	cp  $1
-	jp  nz,.move_done
-	ld  a,$0
-	ld  [vblank_count],a
-	jp  .move_right
-.tile_reset
-	ld  a,$4
-	ld  [player_tile],a
-	jp .move_speed
-.move_right
-	ld  a,[player_x] 		   ;right bound
-	cp  $A0
-	jr  z,.move_left
+; 	ld  a,b
+; 	ld  [player_tile],a
+; .move_speed
+; 	ld  a,[vblank_count]
+; 	cp  $1
+; 	jp  nz,.move_done
+; 	ld  a,$0
+; 	ld  [vblank_count],a
+; 	jp  .move_right
+; .tile_reset
+; 	ld  a,$4
+; 	ld  [player_tile],a
+; 	jp .move_speed
+; .move_right
+; 	ld  a,[player_x] 		   ;right bound
+; 	cp  $A0
+; 	jr  z,.move_left
 
-	ld  a,[joypad_down]
-	call JOY_RIGHT
-	jr  nz,.move_left
-	ld  a,[player_x]
-	inc a
-	ld  [player_x],a
+; 	ld  a,[joypad_down]
+; 	call JOY_RIGHT
+; 	jr  nz,.move_left
+; 	ld  a,[player_x]
+; 	inc a
+; 	ld  [player_x],a
 
-	ld  a,[player_flags]        ;flip tile
-	res 5,a
-	ld  [player_flags],a
-.move_left
-	ld  a,[player_x]			;left bound
-	cp  $8
-	jr  z,.move_up
+; 	ld  a,[player_flags]        ;flip tile
+; 	res 5,a
+; 	ld  [player_flags],a
+; .move_left
+; 	ld  a,[player_x]			;left bound
+; 	cp  $8
+; 	jr  z,.move_up
 
-	ld  a,[joypad_down]
-	call JOY_LEFT
-	jr  nz,.move_up
-	ld  a,[player_x]
-	dec a
-	ld  [player_x],a
+; 	ld  a,[joypad_down]
+; 	call JOY_LEFT
+; 	jr  nz,.move_up
+; 	ld  a,[player_x]
+; 	dec a
+; 	ld  [player_x],a
 
-	ld  a,[player_flags]        ;flip tile
-	set 5,a
-	ld  [player_flags],a
-.move_up
-	ld  a,[player_y] 			;up bound
-	cp  $10
-	jr  z,.move_down
+; 	ld  a,[player_flags]        ;flip tile
+; 	set 5,a
+; 	ld  [player_flags],a
+; .move_up
+; 	ld  a,[player_y] 			;up bound
+; 	cp  $10
+; 	jr  z,.move_down
 
-	ld  a,[joypad_down]
-	call JOY_UP
-	jr  nz,.move_down
-	ld  a,[player_y]
-	dec a
-	ld  [player_y],a
-.move_down
-	ld  a,[player_y] 			;left bound
-	cp  $90
-	jr  z,.move_done
+; 	ld  a,[joypad_down]
+; 	call JOY_UP
+; 	jr  nz,.move_down
+; 	ld  a,[player_y]
+; 	dec a
+; 	ld  [player_y],a
+; .move_down
+; 	ld  a,[player_y] 			;left bound
+; 	cp  $90
+; 	jr  z,.move_done
 
-	ld  a,[joypad_down]
-	call JOY_DOWN
-	jr  nz,.move_done
-	ld  a,[player_y]
-	inc a
-	ld  [player_y],a
-.move_done
-	ret
+; 	ld  a,[joypad_down]
+; 	call JOY_DOWN
+; 	jr  nz,.move_done
+; 	ld  a,[player_y]
+; 	inc a
+; 	ld  [player_y],a
+; .move_done
+; 	ret
