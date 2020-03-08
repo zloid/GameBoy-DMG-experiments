@@ -1,0 +1,1 @@
+SECTION "Program Start",ROM0[$150]
