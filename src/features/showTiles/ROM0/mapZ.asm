@@ -1,5 +1,0 @@
-SECTION "Tiles",ROM0
-
-TILE_DATA:
-
-; DB $00,$00,$00,$00,$00,$00,$00,$00

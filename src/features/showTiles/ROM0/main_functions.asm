@@ -1,7 +1,3 @@
-INCLUDE "tiles.asm"
-INCLUDE "map.asm"
-
-;============================================================
 LOAD_TILES:
 	ld  hl,TILE_DATA
 	ld  de,_VRAM
